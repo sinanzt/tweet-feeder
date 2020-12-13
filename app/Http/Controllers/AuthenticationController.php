@@ -7,6 +7,104 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
+/**
+ * @OA\Post(
+ * path="/api/login",
+ * summary="Login",
+ * description="Login by email, password",
+ * operationId="authLogin",
+ * tags={"Auth"},
+ * @OA\RequestBody(
+ *    required=true,
+ *    description="Pass user credentials",
+ *    @OA\JsonContent(
+ *       required={"email","password"},
+ *       @OA\Property(property="email", type="string", format="email", example="user1@mail.com"),
+ *       @OA\Property(property="password", type="string", format="password", example="PassWord12345")
+ *    ),
+ * ),
+ * @OA\Response(
+ *    response=401,
+ *    description="Wrong credentials response",
+ *    @OA\JsonContent(
+ *       @OA\Property(property="message", type="string", example="Unauthorized, Please check your credentials")
+ *        )
+ *     )
+ * )
+ */
+
+/**
+ * @OA\Post(
+ * path="/api/register",
+ * summary="Sign Up",
+ * description="Sign Up by name, email, password, password_confirm, phone, twitter_username",
+ * operationId="authRegister",
+ * tags={"Auth"},
+ * @OA\RequestBody(
+ *    required=true,
+ *    description="Sign Up user",
+ *    @OA\JsonContent(
+ *       required={"name", "email","password", "password_confirm", "phone", "twitter_username"},
+ *       @OA\Property(property="name", type="string", example="name"),
+ *       @OA\Property(property="email", type="string", format="email", example="user1@mail.com"),
+ *       @OA\Property(property="password", type="string", format="password", example="PassWord12345"),
+ *       @OA\Property(property="password_confirm", type="string", format="password", example="PassWord12345"),
+ *       @OA\Property(property="phone", type="string", example="5552123433"),
+ *       @OA\Property(property="twitter_username", type="string", example="username123")
+ *    ),
+ * ),
+ * @OA\Response(
+ *    response=400,
+ *    description="Input Format response",
+ *  )
+ * )
+ */
+
+/**
+ * @OA\Post(
+ * path="/api/validate-user-phone",
+ * summary="Validate User Phone",
+ * description="Validate User Phone by Phone Number",
+ * operationId="authValidateUserPhone",
+ * tags={"Auth"},
+ * @OA\RequestBody(
+ *    required=true,
+ *    description="Validate User Phone",
+ *    @OA\JsonContent(
+ *       required={"phone", "code"},
+ *       @OA\Property(property="phone", type="string", example="5552123433"),
+ *       @OA\Property(property="code", type="string", example="A1B2C3"),
+ *    ),
+ * ),
+ * @OA\Response(
+ *    response=400,
+ *    description="Input Format response",
+ *  )
+ * )
+ */
+
+/**
+ * @OA\Post(
+ * path="/api/validate-user-email",
+ * summary="Validate User Email",
+ * description="Validate User Email",
+ * operationId="authValidateUserEmail",
+ * tags={"Auth"},
+ * @OA\RequestBody(
+ *    required=true,
+ *    description="Validate User Email",
+ *    @OA\JsonContent(
+ *       required={"email", "code"},
+ *       @OA\Property(property="email", type="string", format="email", example="user1@mail.com"),
+ *       @OA\Property(property="code", type="string", example="A1B2C3"),
+ *    ),
+ * ),
+ * @OA\Response(
+ *    response=400,
+ *    description="Input Format response",
+ *  )
+ * )
+ */
 
 class AuthenticationController extends Controller
 {
