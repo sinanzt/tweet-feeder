@@ -17,7 +17,7 @@ class CreateTweetsTable extends Migration
             $table->id();
             $table->text('content');
             $table->dateTime("published_at");
-            $table->string('tweet_id')->unique();
+            $table->string('tweet_remote_id')->unique();
             $table->boolean('is_active')->default(false);
             $table->integer('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

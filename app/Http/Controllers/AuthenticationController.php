@@ -3,15 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 
 class AuthenticationController extends Controller
 {
-    public function login(Request $request) {
+    public function authenticate(Request $request) {
         $rules = array(
             'email' => 'required|email',
             'password' => [
@@ -29,25 +28,24 @@ class AuthenticationController extends Controller
         if($validator->fails()) {
             return response()->json($validator->messages(), 400);
         } else {
-            return response()->json('login-ok', 200);
+            if(User::where('email', $request->get('email'))->exists()) {
+                $user = User::where('email', $request->get('email'))->first();
+                $auth = Hash::check($request->get('password'), $user->password);
+                if($user && $auth){
+                    $user->rollApiKey();
+                    return response()->json(array(
+                        'token' => $user->token,
+                        'message' => 'Authorization Successful!',
+                    ), 200);
+                }
+            }
+            return response(array(
+                'message' => 'Unauthorized, Please check your credentials.',
+            ), 401);
         }
     }
 
-    public function resetPassword(Request $request) {
-        $rules = array(
-            'email' => 'required|email'
-        );
-
-        $validator = \Validator::make($request->all(),$rules);
-        if($validator->fails()){
-            return response()->json($validator->messages(), 400);
-        }
-        else {
-            return response()->json('resetPassword-ok',200);
-        }
-    }
-
-    public function signUp(Request $request) {
+    public function register(Request $request) {
         $rules = array(
             'name'  => 'required|string',
             'email' => 'required|email|unique:users',
@@ -119,7 +117,7 @@ class AuthenticationController extends Controller
 
     // TODO: TYPE enum yapayım mı ? Bu generator u bi helper a filan mı alsam ?
     private function generateCode():string {
-        return 'FAS324';
+        return  Str::random(6);
     }
 
 }

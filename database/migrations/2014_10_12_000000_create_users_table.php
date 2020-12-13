@@ -20,6 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('twitter_username')->unique();
             $table->string('email')->unique();
             $table->string('password');
+            $table->text('token')->unique()->nullable();
 
             // TODO: bu alanlar burda doğru mu ?
             $table->boolean('is_email_validated')->default(false);

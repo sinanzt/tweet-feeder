@@ -13,7 +13,7 @@ class Tweet extends Model
     protected $fillable = [
         'content',
         'published_at',
-        'tweet_id',
+        'tweet_remote_id',
         'user_id'
     ];
 

@@ -24,7 +24,7 @@ class TweetFactory extends Factory
         return [
             'content' => $this->faker->text(210),
             'published_at' => $this->faker->dateTime,
-            'tweet_id' => $this->faker->uuid,
+            'tweet_remote_id' => $this->faker->uuid,
             'user_id' => null
         ];
     }
