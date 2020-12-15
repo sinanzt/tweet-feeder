@@ -10,7 +10,7 @@ class ApiAuthentication
     {
         $token = $request->bearerToken();
 
-        if ($token){
+        if ($token) {
             $user = User::where('token', $token)->first();
             if ($user) {
                 auth()->login($user);

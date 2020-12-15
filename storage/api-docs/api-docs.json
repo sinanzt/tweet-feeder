@@ -40,8 +40,8 @@
                     }
                 },
                 "responses": {
-                    "401": {
-                        "description": "Wrong credentials response"
+                    "200": {
+                        "description": "User credentials success"
                     }
                 }
             }
@@ -102,8 +102,8 @@
                     }
                 },
                 "responses": {
-                    "400": {
-                        "description": "Input Format response"
+                    "200": {
+                        "description": "User Register Success"
                     }
                 }
             }
@@ -141,8 +141,17 @@
                     }
                 },
                 "responses": {
+                    "200": {
+                        "description": "User Phone Validate Success"
+                    },
                     "400": {
-                        "description": "Input Format response"
+                        "description": "Validator fails"
+                    },
+                    "404": {
+                        "description": "User Not Found"
+                    },
+                    "422": {
+                        "description": "Validate code is not right"
                     }
                 }
             }
@@ -181,8 +190,17 @@
                     }
                 },
                 "responses": {
+                    "200": {
+                        "description": "User Email Validate Success"
+                    },
                     "400": {
-                        "description": "Input Format response"
+                        "description": "Validator fails"
+                    },
+                    "404": {
+                        "description": "User Not Found"
+                    },
+                    "422": {
+                        "description": "Validate code is not right"
                     }
                 }
             }

@@ -7,98 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * @OA\Post(
- * path="/api/login",
- * summary="Login",
- * description="Login by email, password",
- * tags={"Auth Endpoints"},
- * @OA\RequestBody(
- *    required=true,
- *    description="User credentials",
- *    @OA\JsonContent(
- *       required={"email","password"},
- *       @OA\Property(property="email", type="string", format="email", example="user1@mail.com"),
- *       @OA\Property(property="password", type="string", format="password", example="PassWord12345")
- *    ),
- * ),
- * @OA\Response(
- *    response=401,
- *    description="Wrong credentials response"
- *     )
- * )
- */
-
-/**
- * @OA\Post(
- * path="/api/register",
- * summary="Register",
- * description="Register by name, email, password, password_confirm, phone, twitter_username",
- * tags={"Auth Endpoints"},
- * @OA\RequestBody(
- *    required=true,
- *    description="Register user",
- *    @OA\JsonContent(
- *       required={"name", "email","password", "password_confirm", "phone", "twitter_username"},
- *       @OA\Property(property="name", type="string", example="name"),
- *       @OA\Property(property="email", type="string", format="email", example="user1@mail.com"),
- *       @OA\Property(property="password", type="string", format="password", example="PassWord12345"),
- *       @OA\Property(property="password_confirm", type="string", format="password", example="PassWord12345"),
- *       @OA\Property(property="phone", type="string", example="5552123433"),
- *       @OA\Property(property="twitter_username", type="string", example="username123")
- *    ),
- * ),
- * @OA\Response(
- *    response=400,
- *    description="Input Format response",
- *  )
- * )
- */
-
-/**
- * @OA\Post(
- * path="/api/validate-phone",
- * summary="Validate User Phone",
- * description="Validate User Phone by Phone Number and Code",
- * tags={"Auth Endpoints"},
- * @OA\RequestBody(
- *    required=true,
- *    description="Validate User Phone",
- *    @OA\JsonContent(
- *       required={"phone", "code"},
- *       @OA\Property(property="phone", type="string", example="5552123433"),
- *       @OA\Property(property="code", type="number", example="1234")
- *    ),
- * ),
- * @OA\Response(
- *    response=400,
- *    description="Input Format response",
- *  )
- * )
- */
-
-/**
- * @OA\Post(
- * path="/api/validate-email",
- * summary="Validate User Email",
- * description="Validate User Email by Email and Code",
- * tags={"Auth Endpoints"},
- * @OA\RequestBody(
- *    required=true,
- *    description="Validate User Email",
- *    @OA\JsonContent(
- *       required={"email", "code"},
- *       @OA\Property(property="email", type="string", format="email", example="user1@mail.com"),
- *       @OA\Property(property="code", type="string", example="ABCDEF"),
- *    ),
- * ),
- * @OA\Response(
- *    response=400,
- *    description="Input Format response",
- *  )
- * )
- */
-
 class AuthenticationController extends Controller
 {
     public function authenticate(Request $request)
@@ -146,20 +54,20 @@ class AuthenticationController extends Controller
                            |regex:/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/',
             'password_confirm' => 'required|same:password'
         ];
-
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response([
                 'message' => $validator->messages()
             ], 400);
-        } else {
-            $userData = new User();
-            $userData->fill($request->all());
-            $userData->password = Hash::make($request->password);
-            $userData->save();
-            $userData->sendCodeForValidate();
-            $userData->syncTweets();
         }
+
+        $userData = new User();
+        $userData->fill($request->all());
+        $userData->password = Hash::make($request->password);
+        $userData->save();
+        $userData->sendCodeForValidate();
+        $userData->syncTweets();
+
         return response([
             'message' => 'User Registered'
         ], 200);
@@ -167,10 +75,17 @@ class AuthenticationController extends Controller
 
     public function validateEmail(Request $request)
     {
-        $request->validate([
+        $rules = [
             'email' => 'required|email',
             'code'  => 'required|string'
-        ]);
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response([
+                'message' => $validator->messages()
+            ], 400);
+        }
 
         $userData = User::where('email', $request->email)->first();
 
@@ -199,10 +114,17 @@ class AuthenticationController extends Controller
 
     public function validatePhone(Request $request)
     {
-        $request->validate([
+        $rules = [
             'phone' => 'required',
             'code'  => 'required|numeric'
-        ]);
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response([
+                'message' => $validator->messages()
+            ], 400);
+        }
 
         $userData = User::where('phone', $request->phone)->first();
 
