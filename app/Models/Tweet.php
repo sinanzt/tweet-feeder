@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Tweet extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'content',
@@ -17,8 +18,8 @@ class Tweet extends Model
         'user_id'
     ];
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
-
     }
 }

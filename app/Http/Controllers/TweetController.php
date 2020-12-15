@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Tweet;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\SecurityScheme(
@@ -22,35 +20,35 @@ use Illuminate\Support\Facades\Log;
  */
 
 /**
- *  @OA\Post(
- *      path="/api/tweet-list",
- *      tags={"tweet-endpoints"},
+ *  @OA\Get(
+ *      path="/api/tweets",
+ *      tags={"Tweet Endpoints"},
  *      security={{"bearerAuth":{}}},
- *      @OA\RequestBody(
+ *      @OA\Parameter(
+ *          name="twitter_username",
+ *          in="query",
  *          required=false,
- *          description="listing of Tweets",
- *          @OA\JsonContent(
- *              required=false,
- *              required={"twitter_username"},
- *              @OA\Property(property="twitter_username", type="string", example="username1"),
+ *          description="Twitter username",
+ *          @OA\Schema(
+ *              type="string"
  *          ),
  *      ),
- *      @OA\Response(response="200", description="Display a listing of Tweets paginate with size 20.")
+ *      @OA\Response(response="200", description="Listing of Tweets paginate with size 20.")
  *  )
  */
 
 /**
  *  @OA\Put(
  *      path="/api/tweets/{id}",
- *      tags={"tweet-endpoints"},
+ *      tags={"Tweet Endpoints"},
  *      security={{"bearerAuth":{}}},
  *      @OA\Parameter(
- *      name="id",
- *      in="path",
- *      required=true,
- *      @OA\Schema(
- *           type="integer"
- *      )
+ *          name="id",
+ *          in="path",
+ *          required=true,
+ *          @OA\Schema(
+ *              type="integer"
+ *          )
  *      ),
  *      @OA\RequestBody(
  *          required=false,
@@ -68,7 +66,7 @@ use Illuminate\Support\Facades\Log;
 /**
  *  @OA\Post(
  *      path="/api/tweets/{id}/publish",
- *      tags={"tweet-endpoints"},
+ *      tags={"Tweet Endpoints"},
  *      security={{"bearerAuth":{}}},
  *      @OA\Parameter(
  *          name="id",
@@ -82,14 +80,14 @@ use Illuminate\Support\Facades\Log;
  *          required=false,
  *          description="Publish Tweet with remote"
  *      ),
- *      @OA\Response(response="200", description="Tweet is published with remote")
+ *      @OA\Response(response="200", description="Tweet is published to remote")
  *  )
  */
 
 /**
- *  @OA\Get(
+ *  @OA\Post(
  *      path="/api/tweets/sync",
- *      tags={"tweet-endpoints"},
+ *      tags={"Tweet Endpoints"},
  *      security={{"bearerAuth":{}}},
  *      @OA\Response(response="200", description="Tweets syncronized with remote")
  *  )
@@ -97,78 +95,63 @@ use Illuminate\Support\Facades\Log;
 
 class TweetController extends Controller
 {
-    public function getAllTweets(Request $request) {
-        if ($request->has('twitter_username')) {
-            $twitter_username = $request->twitter_username;
-        } else {
-            $twitter_username = auth()->user()->twitter_username;
-        }
-        $tweets = Tweet::whereHas('user', function($q) use ($twitter_username) {
-            $q->where('twitter_username', '=', $twitter_username);
+    public function list(Request $request)
+    {
+        $twitterUsername = $request->query('twitter_username')
+            ? $request->twitter_username
+            : auth()->user()->twitter_username;
+
+        $tweets = Tweet::whereHas('user', function ($q) use ($twitterUsername) {
+            $q->where('twitter_username', '=', $twitterUsername);
         })->orderBy('published_at', 'desc')->paginate(20);
-        return response()->json($tweets,200);
+
+        return response([
+            'data' => [ 'tweets' => $tweets ],
+            'message' => 'Success!'
+        ], 200);
     }
 
-    public function syncLastTweetsWithRemote() {
-        $tweetList = $this->getLastTweetsFromRemote(auth()->user()->twitter_username);
-        $this->saveTweets(auth()->user()->id,$tweetList);
+    public function syncWithRemote()
+    {
+        auth()->user()->syncTweets();
+        return response([
+            'message' => 'Tweets synchronized'
+        ], 200);
     }
 
-    public function publishTweet($id) {
-        // TODO: tweet i paylaş
+    public function publish($id)
+    {
         $tweet = Tweet::where('user_id', auth()->user()->id)->where('id', $id)->first();
-        if ($tweet){
-            return response()->json($tweet,200);
+        if (!$tweet) {
+            return response([
+                'message' => 'Tweet not found'
+            ], 404);
         }
-        return response()->json("Tweet not found",404);
+        $tweet->is_published = true;
+        $tweet->update();
+        return response([
+            'data' => [ 'tweet' => $tweet ],
+            'message' => 'Tweet Published!'
+        ], 200);
     }
 
-    public function updateTweet(Request $request, $id) {
-        $rules = array(
+    public function update(Request $request, $id)
+    {
+        $request->validate([
             'content'  => 'required|string|max:280'
-        );
-        $validator = \Validator::make($request->all(), $rules);
+        ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->messages(),400);
-        } else {
-            $tweet = Tweet::where('user_id', auth()->user()->id)->where('id', $id)->first();
-            if (!$tweet){
-                return response()->json("Tweet not found",404);
-            }
-            $tweet->content = $request['content'];
-            $tweet->update();
-            return response()->json('Tweet Updated',200);
+        $tweet = Tweet::where('user_id', auth()->user()->id)->where('id', $id)->first();
+        if (!$tweet) {
+            return response([
+                'message' => 'Tweet not found'
+            ], 404);
         }
+        $tweet->content = $request['content'];
+        $tweet->update();
+        return response([
+            'data' => [ 'tweet' => $tweet ],
+            'message' => 'Tweet Updated!'
+        ], 200);
     }
-
-    private function getLastTweetsFromRemote(string $username): array {
-        try {
-            return \Twitter::getUserTimeline(['screen_name' => $username, 'count' => 20, 'format' => 'array']);
-        }
-        catch (\Exception $e)
-        {
-            Log::error(\Twitter::logs());
-        }
-    }
-
-    private function saveTweets(int $user_id, array $tweetList){
-        $mappedTweetList = $this->mapToArrayTweets($user_id, $tweetList);
-        DB::table('tweets')->insertOrIgnore($mappedTweetList);
-    }
-
-    private function mapToArrayTweets(int $user_id, array $tweetList): array {
-        $mappedList = [];
-        foreach( $tweetList as $key => $value ) {
-            $mappedTweet = [
-                'content' => $value['text'],
-                'published_at' => $value['created_at'],
-                'tweet_remote_id' => $value['id_str'],
-                'user_id' => $user_id
-            ];
-            array_push($mappedList, $mappedTweet);
-        }
-        return $mappedList;
-    }
-
 }

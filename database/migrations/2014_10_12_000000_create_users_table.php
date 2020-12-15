@@ -21,15 +21,10 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->text('token')->unique()->nullable();
-
-            // TODO: bu alanlar burda doğru mu ?
             $table->boolean('is_email_validated')->default(false);
             $table->boolean('is_phone_validated')->default(false);
-
-            // TODO: bu alana bir anlam yüklemeli miyim ?
-            $table->boolean('is_active')->default(false);
-            $table->timestamp('email_verified_at')->nullable();
-            $table->rememberToken();
+            $table->string('email_validate_code')->nullable();
+            $table->integer('phone_validate_code')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

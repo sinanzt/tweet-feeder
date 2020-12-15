@@ -5,18 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * @OA\Post(
  * path="/api/login",
  * summary="Login",
  * description="Login by email, password",
- * operationId="authLogin",
- * tags={"Auth"},
+ * tags={"Auth Endpoints"},
  * @OA\RequestBody(
  *    required=true,
- *    description="Pass user credentials",
+ *    description="User credentials",
  *    @OA\JsonContent(
  *       required={"email","password"},
  *       @OA\Property(property="email", type="string", format="email", example="user1@mail.com"),
@@ -25,10 +24,7 @@ use Illuminate\Support\Str;
  * ),
  * @OA\Response(
  *    response=401,
- *    description="Wrong credentials response",
- *    @OA\JsonContent(
- *       @OA\Property(property="message", type="string", example="Unauthorized, Please check your credentials")
- *        )
+ *    description="Wrong credentials response"
  *     )
  * )
  */
@@ -36,13 +32,12 @@ use Illuminate\Support\Str;
 /**
  * @OA\Post(
  * path="/api/register",
- * summary="Sign Up",
- * description="Sign Up by name, email, password, password_confirm, phone, twitter_username",
- * operationId="authRegister",
- * tags={"Auth"},
+ * summary="Register",
+ * description="Register by name, email, password, password_confirm, phone, twitter_username",
+ * tags={"Auth Endpoints"},
  * @OA\RequestBody(
  *    required=true,
- *    description="Sign Up user",
+ *    description="Register user",
  *    @OA\JsonContent(
  *       required={"name", "email","password", "password_confirm", "phone", "twitter_username"},
  *       @OA\Property(property="name", type="string", example="name"),
@@ -62,18 +57,17 @@ use Illuminate\Support\Str;
 
 /**
  * @OA\Post(
- * path="/api/validate-user-phone",
+ * path="/api/validate-phone",
  * summary="Validate User Phone",
- * description="Validate User Phone by Phone Number",
- * operationId="authValidateUserPhone",
- * tags={"Auth"},
+ * description="Validate User Phone by Phone Number and Code",
+ * tags={"Auth Endpoints"},
  * @OA\RequestBody(
  *    required=true,
  *    description="Validate User Phone",
  *    @OA\JsonContent(
  *       required={"phone", "code"},
  *       @OA\Property(property="phone", type="string", example="5552123433"),
- *       @OA\Property(property="code", type="string", example="A1B2C3"),
+ *       @OA\Property(property="code", type="number", example="1234")
  *    ),
  * ),
  * @OA\Response(
@@ -85,18 +79,17 @@ use Illuminate\Support\Str;
 
 /**
  * @OA\Post(
- * path="/api/validate-user-email",
+ * path="/api/validate-email",
  * summary="Validate User Email",
- * description="Validate User Email",
- * operationId="authValidateUserEmail",
- * tags={"Auth"},
+ * description="Validate User Email by Email and Code",
+ * tags={"Auth Endpoints"},
  * @OA\RequestBody(
  *    required=true,
  *    description="Validate User Email",
  *    @OA\JsonContent(
  *       required={"email", "code"},
  *       @OA\Property(property="email", type="string", format="email", example="user1@mail.com"),
- *       @OA\Property(property="code", type="string", example="A1B2C3"),
+ *       @OA\Property(property="code", type="string", example="ABCDEF"),
  *    ),
  * ),
  * @OA\Response(
@@ -108,114 +101,128 @@ use Illuminate\Support\Str;
 
 class AuthenticationController extends Controller
 {
-    public function authenticate(Request $request) {
-        $rules = array(
+    public function authenticate(Request $request)
+    {
+        $rules = [
             'email' => 'required|email',
-            'password' => [
-                'required',
-                'string',
-                'min:8',
-                'regex:/[a-z]/',
-                'regex:/[A-Z]/',
-                'regex:/[0-9]/',
-                'regex:/[@$!%*#?&]/'
-            ]
-        );
+            'password' => 'required'
+        ];
 
-        $validator = \Validator::make($request->all(),$rules);
-        if($validator->fails()) {
-            return response()->json($validator->messages(), 400);
-        } else {
-            if(User::where('email', $request->get('email'))->exists()) {
-                $user = User::where('email', $request->get('email'))->first();
-                $auth = Hash::check($request->get('password'), $user->password);
-                if($user && $auth){
-                    $user->rollApiKey();
-                    return response()->json(array(
-                        'token' => $user->token,
-                        'message' => 'Authorization Successful!',
-                    ), 200);
-                }
-            }
-            return response(array(
-                'message' => 'Unauthorized, Please check your credentials.',
-            ), 401);
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response([
+                'message' => $validator->messages()
+            ], 400);
         }
+
+        $userData = User::where('email', $request->get('email'));
+        if ($userData->exists()) {
+            $userData = $userData->first();
+            $authChecked = Hash::check($request->get('password'), $userData->password);
+            if ($userData && $authChecked) {
+                $userData->rollApiToken();
+                /* Bu endpontin kullanacağı pakete göre bu token headerda da gönderbilirim.
+                Ön taraf ilgili yerden okur. */
+                return response([
+                    'data' => [ 'token' => $userData->token ],
+                    'message' => 'Authorization Successful!'
+                ], 200);
+            }
+        }
+
+        return response([
+            'message' => 'Unauthorized, Please check your credentials.',
+        ], 401);
     }
 
-    public function register(Request $request) {
-        $rules = array(
+    public function register(Request $request)
+    {
+        $rules = [
             'name'  => 'required|string',
             'email' => 'required|email|unique:users',
-            'phone' => 'required|size:10|unique:users',
+            'phone' => 'required|unique:users',
             'twitter_username' => 'required|unique:users',
-            'password' => [
-                'required',
-                'string',
-                'min:8',
-                'regex:/[a-z]/',
-                'regex:/[A-Z]/',
-                'regex:/[0-9]/',
-                'regex:/[@$!%*#?&]/'
-            ],
+            'password' => 'required|string|min:8
+                           |regex:/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/',
             'password_confirm' => 'required|same:password'
-        );
+        ];
 
-        $validator = \Validator::make($request->all(), $rules);
+        $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-           return response()->json($validator->messages(),400);
+            return response([
+                'message' => $validator->messages()
+            ], 400);
         } else {
-            $user = new User();
-            $user->fill($request->all());
-            $user->password = Hash::make($request->password);
-            $user->save();
-            $this->sendGeneratedCodeForValidate($user->id);
-            return response()->json(['message'=> 'User Created'],200);
+            $userData = new User();
+            $userData->fill($request->all());
+            $userData->password = Hash::make($request->password);
+            $userData->save();
+            $userData->sendCodeForValidate();
+            $userData->syncTweets();
         }
+        return response([
+            'message' => 'User Registered'
+        ], 200);
     }
 
-    public function validateUserEmail(Request $request) {
-        $rules = array(
+    public function validateEmail(Request $request)
+    {
+        $request->validate([
             'email' => 'required|email',
             'code'  => 'required|string'
-        );
-        $validator = \Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-            return response()->json($validator->messages(),400);
-        } else {
-            $user = User::where('email',$request->email)->first();
-            $user->is_email_validated = true;
-            $user->update();
-            return response()->json('User Email Validated',200);
+        ]);
+
+        $userData = User::where('email', $request->email)->first();
+
+        if (!$userData) {
+            return response([
+                'message' => 'User Not Found'
+            ], 404);
         }
-    }
 
-    public function validateUserPhone(Request $request) {
-        $rules = array(
-            'phone' => 'required|size:10',
-            'code'  => 'required|string'
-        );
-        $validator = \Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-            return response()->json($validator->messages(),400);
-        } else {
-            $user = User::where('phone',$request->phone)->first();
-            $user->is_phone_validated = true;
-            $user->update();
-            return response()->json('User Phone Validated',200);
+        if ($userData->email_validate_code !== $request->code) {
+            return response([
+                'message' => 'Validate code is not right'
+            ], 422);
         }
+
+        /* Normalde bu tarz kod doğrulamalarının (zaman kısıtlaması olduğu için) redis gibi sistemlerde tutulması
+        daha doğru olurdu. Ama şuanlık zaman alacağından dolayı db yazdıp ordan check ettim */
+
+        $userData->is_email_validated = true;
+        $userData->email_validate_code = null;
+        $userData->update();
+        return response([
+            'message' => 'User Email Validated'
+        ], 200);
     }
 
-    // TODO: Bu generator u bi helper a filan mı alsam ? Bu kodu db ye kaydetsem mi sonrasında valide etmek için vs
-    private function sendGeneratedCodeForValidate(int $userId){
-        $generatedCode = $this->generateCode();
-        \Log::info($userId. " id li kullanıcının email ve phone için doğrulama kodu " . $generatedCode);
+    public function validatePhone(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required',
+            'code'  => 'required|numeric'
+        ]);
 
+        $userData = User::where('phone', $request->phone)->first();
+
+        if (!$userData) {
+            return response([
+                'message' => 'User Not Found'
+            ], 404);
+        }
+
+        if ($userData->phone_validate_code !== $request->code) {
+            return response([
+                'message' => 'Validate code is not right'
+            ], 422);
+        }
+
+        $userData->is_phone_validated = true;
+        $userData->phone_validate_code = null;
+        $userData->update();
+        return response([
+            'message' => 'User Phone Validated'
+        ], 200);
     }
-
-    // TODO: TYPE enum yapayım mı ? Bu generator u bi helper a filan mı alsam ?
-    private function generateCode():string {
-        return  Str::random(6);
-    }
-
 }

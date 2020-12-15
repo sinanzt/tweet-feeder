@@ -8,13 +8,12 @@
         "/api/login": {
             "post": {
                 "tags": [
-                    "Auth"
+                    "Auth Endpoints"
                 ],
                 "summary": "Login",
                 "description": "Login by email, password",
-                "operationId": "authLogin",
                 "requestBody": {
-                    "description": "Pass user credentials",
+                    "description": "User credentials",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -42,20 +41,7 @@
                 },
                 "responses": {
                     "401": {
-                        "description": "Wrong credentials response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized, Please check your credentials"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Wrong credentials response"
                     }
                 }
             }
@@ -63,13 +49,12 @@
         "/api/register": {
             "post": {
                 "tags": [
-                    "Auth"
+                    "Auth Endpoints"
                 ],
-                "summary": "Sign Up",
-                "description": "Sign Up by name, email, password, password_confirm, phone, twitter_username",
-                "operationId": "authRegister",
+                "summary": "Register",
+                "description": "Register by name, email, password, password_confirm, phone, twitter_username",
                 "requestBody": {
-                    "description": "Sign Up user",
+                    "description": "Register user",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -123,14 +108,13 @@
                 }
             }
         },
-        "/api/validate-user-phone": {
+        "/api/validate-phone": {
             "post": {
                 "tags": [
-                    "Auth"
+                    "Auth Endpoints"
                 ],
                 "summary": "Validate User Phone",
-                "description": "Validate User Phone by Phone Number",
-                "operationId": "authValidateUserPhone",
+                "description": "Validate User Phone by Phone Number and Code",
                 "requestBody": {
                     "description": "Validate User Phone",
                     "required": true,
@@ -147,8 +131,8 @@
                                         "example": "5552123433"
                                     },
                                     "code": {
-                                        "type": "string",
-                                        "example": "A1B2C3"
+                                        "type": "number",
+                                        "example": "1234"
                                     }
                                 },
                                 "type": "object"
@@ -163,14 +147,13 @@
                 }
             }
         },
-        "/api/validate-user-email": {
+        "/api/validate-email": {
             "post": {
                 "tags": [
-                    "Auth"
+                    "Auth Endpoints"
                 ],
                 "summary": "Validate User Email",
-                "description": "Validate User Email",
-                "operationId": "authValidateUserEmail",
+                "description": "Validate User Email by Email and Code",
                 "requestBody": {
                     "description": "Validate User Email",
                     "required": true,
@@ -189,7 +172,7 @@
                                     },
                                     "code": {
                                         "type": "string",
-                                        "example": "A1B2C3"
+                                        "example": "ABCDEF"
                                     }
                                 },
                                 "type": "object"
@@ -204,34 +187,25 @@
                 }
             }
         },
-        "/api/tweet-list": {
-            "post": {
+        "/api/tweets": {
+            "get": {
                 "tags": [
-                    "tweet-endpoints"
+                    "Tweet Endpoints"
                 ],
-                "requestBody": {
-                    "description": "listing of Tweets",
-                    "required": false,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "twitter_username"
-                                ],
-                                "properties": {
-                                    "twitter_username": {
-                                        "type": "string",
-                                        "example": "username1"
-                                    }
-                                },
-                                "type": "object"
-                            }
+                "parameters": [
+                    {
+                        "name": "twitter_username",
+                        "in": "query",
+                        "description": "Twitter username",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
                         }
                     }
-                },
+                ],
                 "responses": {
                     "200": {
-                        "description": "Display a listing of Tweets paginate with size 20."
+                        "description": "Listing of Tweets paginate with size 20."
                     }
                 },
                 "security": [
@@ -244,7 +218,7 @@
         "/api/tweets/{id}": {
             "put": {
                 "tags": [
-                    "tweet-endpoints"
+                    "Tweet Endpoints"
                 ],
                 "parameters": [
                     {
@@ -291,7 +265,7 @@
         "/api/tweets/{id}/publish": {
             "post": {
                 "tags": [
-                    "tweet-endpoints"
+                    "Tweet Endpoints"
                 ],
                 "parameters": [
                     {
@@ -309,7 +283,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Tweet is published with remote"
+                        "description": "Tweet is published to remote"
                     }
                 },
                 "security": [
@@ -320,9 +294,9 @@
             }
         },
         "/api/tweets/sync": {
-            "get": {
+            "post": {
                 "tags": [
-                    "tweet-endpoints"
+                    "Tweet Endpoints"
                 ],
                 "responses": {
                     "200": {
