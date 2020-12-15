@@ -2,12 +2,10 @@
 
 namespace Tests\Unit;
 
-
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Str;
 use Tests\TestCase;
-
 
 class UserTest extends TestCase
 {

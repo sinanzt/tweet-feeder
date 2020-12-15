@@ -145,7 +145,7 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="settings.php.quality.tools" />
+    <property name="settings.editor.selected.configurable" value="Errors" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
@@ -183,7 +183,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1607794466869</updated>
-      <workItem from="1607794467957" duration="89856000" />
+      <workItem from="1607794467957" duration="94740000" />
     </task>
     <servers />
   </component>
@@ -203,14 +203,14 @@
       <screen x="0" y="0" width="1792" height="1120" />
     </state>
     <state x="570" y="206" key="#PHP/0.0.1792.1120@0.0.1792.1120" timestamp="1607899608020" />
-    <state x="484" y="219" key="#PHP_CodeSniffer" timestamp="1607903195252">
+    <state x="484" y="219" key="#PHP_CodeSniffer" timestamp="1608043385640">
       <screen x="0" y="0" width="1792" height="1120" />
     </state>
-    <state x="484" y="219" key="#PHP_CodeSniffer/0.0.1792.1120@0.0.1792.1120" timestamp="1607903195252" />
-    <state x="803" y="474" key="#PHP_CodeSniffer_Ignored_Files" timestamp="1607902229580">
+    <state x="484" y="219" key="#PHP_CodeSniffer/0.0.1792.1120@0.0.1792.1120" timestamp="1608043385640" />
+    <state x="803" y="474" key="#PHP_CodeSniffer_Ignored_Files" timestamp="1608043358052">
       <screen x="0" y="0" width="1792" height="1120" />
     </state>
-    <state x="803" y="474" key="#PHP_CodeSniffer_Ignored_Files/0.0.1792.1120@0.0.1792.1120" timestamp="1607902229580" />
+    <state x="803" y="474" key="#PHP_CodeSniffer_Ignored_Files/0.0.1792.1120@0.0.1792.1120" timestamp="1608043358052" />
     <state x="593" y="366" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1607871001405">
       <screen x="0" y="0" width="1792" height="1120" />
     </state>
@@ -231,18 +231,18 @@
       <screen x="0" y="0" width="1792" height="1120" />
     </state>
     <state x="556" y="290" key="NewPhpClassDialog/0.0.1792.1120@0.0.1792.1120" timestamp="1607903387434" />
-    <state x="405" y="196" key="SettingsEditor" timestamp="1607943354506">
+    <state x="405" y="196" key="SettingsEditor" timestamp="1608043594439">
       <screen x="0" y="0" width="1792" height="1120" />
     </state>
-    <state x="405" y="196" key="SettingsEditor/0.0.1792.1120@0.0.1792.1120" timestamp="1607943354506" />
+    <state x="405" y="196" key="SettingsEditor/0.0.1792.1120@0.0.1792.1120" timestamp="1608043594439" />
     <state x="100" y="100" width="1592" height="920" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1607996750009">
       <screen x="0" y="0" width="1792" height="1120" />
     </state>
     <state x="100" y="100" width="1592" height="920" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.1792.1120@0.0.1792.1120" timestamp="1607996750009" />
-    <state x="597" y="192" width="794" height="735" key="find.popup" timestamp="1608004076198">
+    <state x="597" y="192" width="794" height="735" key="find.popup" timestamp="1608045002754">
       <screen x="0" y="0" width="1792" height="1120" />
     </state>
-    <state x="597" y="192" width="794" height="735" key="find.popup/0.0.1792.1120@0.0.1792.1120" timestamp="1608004076198" />
+    <state x="597" y="192" width="794" height="735" key="find.popup/0.0.1792.1120@0.0.1792.1120" timestamp="1608045002754" />
     <state x="561" y="251" width="670" height="676" key="search.everywhere.popup" timestamp="1607996449228">
       <screen x="0" y="0" width="1792" height="1120" />
     </state>
